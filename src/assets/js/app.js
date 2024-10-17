@@ -11,6 +11,8 @@ const btnSubmit = document.querySelector(".btn");
  */
 const input = document.querySelector(".value");
 
+let inputStorage = JSON.parse(localStorage.getItem('inputvalue')) || []
+
 const fetchArtworks = () => {
   /**
    * @returns {Promise}
@@ -27,7 +29,7 @@ const fetchArtworks = () => {
     .then((data) => {
       containerArt.innerHTML = ``;
       data.data.forEach((art) => {
-        fetch(art.api_link)
+         fetch(art.api_link)
           /**
            * @param {Response}
            * @return {Promise}
@@ -37,7 +39,17 @@ const fetchArtworks = () => {
            * @param {Object}
            */
           .then((data) => {
-            /**
+            const artwork = {
+              title: data.data.title,
+              image_id: data.data.image_id,
+              artist_title : data.data.artist_title || "Artiste inconnu" ,
+              description: data.data.description || "Pas de description",
+              date :data.data.date_start,
+              term_titles :data.data.term_titles || [],
+              materials : data.data.material_titles || []
+
+            };
+             /**
              * @type {HTMLElement}
              */
             const artContainer = document.createElement("div");
@@ -45,12 +57,12 @@ const fetchArtworks = () => {
               "flex flex-col w-[350px] h-[450px] justify-around items-center p-5 bg-neutral-100 rounded-md  ";
 
             const title = document.createElement("p");
-            title.textContent = data.data.title;
+            title.textContent = artwork.title;
             artContainer.appendChild(title);
 
             const figure = document.createElement("figure");
             const img = document.createElement("img");
-            img.src = `https://www.artic.edu/iiif/2/${data.data.image_id}/full/150,/0/default.jpg`;
+            img.src = `https://www.artic.edu/iiif/2/${artwork.image_id}/full/150,/0/default.jpg`;
             figure.appendChild(img);
             artContainer.appendChild(figure);
 
@@ -77,25 +89,25 @@ const fetchArtworks = () => {
 
             const dialogTitle = document.createElement("p");
             dialogTitle.className = "text-xl";
-            dialogTitle.textContent = data.data.title;
+            dialogTitle.textContent = artwork.title;
             overlay.appendChild(dialogTitle);
 
             const dialogImg = document.createElement("img");
-            dialogImg.src = `https://www.artic.edu/iiif/2/${data.data.image_id}/full/150,/0/default.jpg`;
+            dialogImg.src = `https://www.artic.edu/iiif/2/${artwork.image_id}/full/150,/0/default.jpg`;
             overlay.appendChild(dialogImg);
 
             const dialogDescription = document.createElement("div");
-            dialogDescription.innerHTML = data.data.description;
+            dialogDescription.innerHTML = artwork.description;
             overlay.appendChild(dialogDescription);
 
             const dialogNameArtist = document.createElement("p");
             dialogNameArtist.className = "underline";
-            dialogNameArtist.textContent = data.data.artist_title;
+            dialogNameArtist.textContent = artwork.artist_title;
             overlay.appendChild(dialogNameArtist);
             /**
              * @param {string}
              */
-            data.data.term_titles.forEach((term) => {
+            artwork.term_titles.forEach((term) => {
               /**
                * @type {HTMLElement}
                */
@@ -108,13 +120,13 @@ const fetchArtworks = () => {
             });
 
             const dialogDate = document.createElement("p");
-            dialogDate.textContent = data.data.date_start;
+            dialogDate.textContent = artwork.date;
             dialogDate.className = "font-bold";
             overlay.appendChild(dialogDate);
             /**
              * @param {string}
              */
-            data.data.material_titles.forEach((material) => {
+            artwork.materials.forEach((material) => {
               const containermaterial = document.createElement("ul");
               const materials = document.createElement("li");
               materials.textContent = material;
@@ -153,8 +165,21 @@ const dialogEvent = () => {
   });
 };
 
+
 btnSubmit.addEventListener("click", () => {
   fetchArtworks();
+  inputStorage.push(input.value)
+  localStorage.setItem('inputvalue', JSON.stringify(inputStorage))
 });
 
-fetchArtworks();
+const input2 = document.createElement('div')
+
+inputStorage.forEach(input => {
+  const element = document.createElement('p')
+  element.textContent = input
+  input2.appendChild(element)
+  document.body.appendChild(element)
+})
+
+inputStorage.push(input.value)
+localStorage.setItem('inputvalue', JSON.stringify(inputStorage))
